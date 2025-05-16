@@ -110,9 +110,6 @@ If you have any questions or need help, please:
 - Contact me on [Twitter](https://twitter.com/hashanCB)
 - Visit our [Discord community](https://discord.gg/your-discord)
 
-## ⭐️ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=hashanCB/aicomment&type=Date)](https://star-history.com/#hashanCB/aicomment&Date)
 
 ---
 
