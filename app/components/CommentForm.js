@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useCommentCheck } from '../hooks/useCommentCheck'
+import { useCommentCheck } from '@livehashan/comment-check'
 
 export default function CommentForm({ context = 'This is a discussion about web development and programming.', threshold = 0.7 } = {}) {
   const [comment, setComment] = useState('')

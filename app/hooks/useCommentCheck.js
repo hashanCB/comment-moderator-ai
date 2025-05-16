@@ -2,11 +2,25 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 
-export function useCommentCheck({ context = '', threshold = 0.7 } = {}) {
+// Debounce utility function
+function debounce(func, wait) {
+  let timeout
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout)
+      func(...args)
+    }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+  }
+}
+
+export function useCommentCheck({ context = '', threshold = 0.7, debounceMs = 500 } = {}) {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(null)
-  const checkTimeout = useRef(null)
   const contextRef = useRef(context)
+  const debouncedFnRef = useRef(null)
+  const checkTimeout = useRef(null)
 
   // Update context if it changes
   useEffect(() => {
@@ -14,6 +28,9 @@ export function useCommentCheck({ context = '', threshold = 0.7 } = {}) {
   }, [context])
 
   const checkComment = useCallback(async (commentText) => {
+    if (checkTimeout.current) {
+      clearTimeout(checkTimeout.current)
+    }
     if (!commentText?.trim()) {
       setResult({ approved: false, reason: 'Comment cannot be empty' })
       return
@@ -52,14 +69,14 @@ export function useCommentCheck({ context = '', threshold = 0.7 } = {}) {
     } finally {
       setIsLoading(false)
     }
-  }, [threshold])
+  }, [threshold, contextRef])
 
   const debouncedCheck = useCallback((text) => {
     if (checkTimeout.current) {
       clearTimeout(checkTimeout.current)
     }
-    checkTimeout.current = setTimeout(() => checkComment(text), 1000)
-  }, [checkComment])
+    checkTimeout.current = setTimeout(() => checkComment(text), debounceMs)
+  }, [checkComment, debounceMs])
 
   return {
     isLoading,
