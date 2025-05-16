@@ -1,125 +1,119 @@
-# AI-Powered Comment Moderation System
+# AI-Powered Comment Moderation System 🤖
 
-This project provides an intelligent comment moderation system using Next.js and OpenRouter AI. It's available as two npm packages:
+[![NPM Version](https://img.shields.io/npm/v/@livehashan/comment-check)](https://www.npmjs.com/package/@livehashan/comment-check)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-1. [@livehashan/comment-check-hook](https://www.npmjs.com/package/@livehashan/comment-check-hook) - React hook for comment validation
-2. [@livehashan/comment-check-api](https://www.npmjs.com/package/@livehashan/comment-check-api) - API implementation with AI integration
+A modern, AI-powered comment moderation system built with Next.js and OpenRouter AI. This project provides real-time comment validation with context awareness and detailed feedback.
 
-## Features
+## ✨ Features
 
-- AI-powered comment moderation
-- Context-aware validation
-- Real-time feedback
-- Customizable validation rules
-- TypeScript support
-- Next.js and Express.js support
+- 🔥 Real-time comment validation
+- 🤖 AI-powered content moderation
+- 💬 Context-aware responses
+- ⏱️ Debounced API calls for better performance
+- 📈 Detailed validation statistics
+- 💻 Modern React hooks for easy integration
+- 🎨 Beautiful UI with Tailwind CSS
+- 🚀 Next.js App Router support
 
-## Quick Start
-
-1. Install the packages:
+## 🛠️ Installation
 
 ```bash
-npm install @livehashan/comment-check-hook @livehashan/comment-check-api @openrouter/ai-sdk-provider ai
+npm install @livehashan/comment-check
 ```
 
-2. Set up environment variables in `.env.local`:
+## 📖 Quick Start
 
+1. Set up your environment variables:
 ```env
 OPENROUTER_API_KEY=your_api_key_here
-OPENROUTER_MODEL=openai/gpt-3.5-turbo
+OPENROUTER_MODEL=deepseek/deepseek-chat-v3-0324:free
 ```
 
-3. Create the API endpoint:
+2. Create your API route (Next.js):
+```javascript
+import { CommentChecker } from '@livehashan/comment-check';
 
-```typescript
-// app/api/check-comment/route.ts
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { generateText } from 'ai';
-
-if (!process.env.OPENROUTER_API_KEY) {
-  throw new Error('OPENROUTER_API_KEY is not defined');
-}
-
-const openRouterProvider = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+const checker = new CommentChecker(
+  process.env.OPENROUTER_API_KEY,
+  process.env.OPENROUTER_MODEL
+);
 
 export async function POST(req) {
-  const { comment, context = '' } = await req.json();
-  
-  // Create AI prompt for moderation
-  const prompt = `Moderate: "${comment}" ${context ? `\nContext: ${context}` : ''}`;
-  
-  const response = await generateText({
-    model: openRouterProvider(process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo'),
-    prompt,
-  });
-  
-  // Parse AI response
-  const approved = !response.text.toLowerCase().includes('inappropriate');
-  
-  return Response.json({
-    approved,
-    reason: response.text,
-    confidence: approved ? 0.9 : 0.1
-  });
+  const body = await req.json();
+  const result = await checker.checkComment(body);
+  return new Response(JSON.stringify(result));
 }
 ```
 
-4. Use the hook in your components:
+3. Use the React hook in your component:
+```javascript
+'use client'
+import { useCommentCheck } from '@livehashan/comment-check'
 
-```jsx
-import { useCommentCheck } from '@livehashan/comment-check-hook';
+export default function CommentForm() {
+  const [comment, setComment] = useState('')
+  const { isLoading, result, checkComment } = useCommentCheck()
 
-function CommentForm() {
-  const { checkComment, isLoading, result } = useCommentCheck({
-    context: 'Optional context',
-    threshold: 0.7
-  });
-
-  const handleSubmit = async (comment) => {
-    await checkComment(comment);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await checkComment(comment)
+  }
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Your form content */}
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Write your comment here..."
+      />
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? 'Checking...' : 'Submit'}
+      </button>
+      {result && (
+        <div>
+          {result.approved ? '✅ Approved!' : '❌ Not Approved'}
+          <p>{result.reason}</p>
+        </div>
+      )}
     </form>
-  );
+  )
 }
-```
 
-## Development
+## 💻 Tech Stack
 
-To run the development server:
+- Next.js 13+ (App Router)
+- React 18+
+- OpenRouter AI API
+- TypeScript
+- Tailwind CSS
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📃 License
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+MIT © [Hashan](https://github.com/hashanCB)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ❤️ Contributing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Learn More
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-To learn more about Next.js, take a look at the following resources:
+## 💬 Support
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If you have any questions or need help, please:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Open an [issue](https://github.com/hashanCB/aicomment/issues)
+- Contact me on [Twitter](https://twitter.com/hashanCB)
+- Visit our [Discord community](https://discord.gg/your-discord)
 
-## Deploy on Vercel
+## ⭐️ Star History
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+[![Star History Chart](https://api.star-history.com/svg?repos=hashanCB/aicomment&type=Date)](https://star-history.com/#hashanCB/aicomment&Date)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Made with ❤️ by [Hashan](https://github.com/hashanCB)
